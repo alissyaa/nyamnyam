@@ -50,4 +50,13 @@ public class CherryBomb : MonoBehaviour
 
         transform.localScale = scale;
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            Destroy(gameObject); // hancurkan CherryBomb
+        }
+    }
+
 }

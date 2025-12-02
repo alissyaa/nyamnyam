@@ -1,23 +1,55 @@
 using UnityEngine;
 
-public class FallObject : MonoBehaviour
+public class FallingObject : MonoBehaviour
 {
-    public float fallSpeed = 3f;   // kecepatan jatuh (ubah kapan aja)
-    public float destroyY = -10f;  // posisi di mana objek akan dihancurkan
+    public float fallSpeed = 3f;
+    public float destroyY = -10f;
+
+    public float rotateSpeed = 120f; // rotasi 3D
+    private float fixedZ;            // Z tetap, biar selalu sejajar dengan player
+
+    void Start()
+    {
+        fixedZ = transform.position.z;   // ambil Z awal
+    }
 
     void Update()
     {
-        // Translasi manual: mengurangi y position secara halus
-        transform.position = new Vector3(
-            transform.position.x,
-            transform.position.y - fallSpeed * Time.deltaTime,
-            transform.position.z
-        );
+        HandleFall();
+        HandleRotation();
+    }
 
-        // Hapus kalau sudah jatuh terlalu jauh
-        if (transform.position.y < destroyY)
-        {
+    void HandleFall()
+    {
+        // Ambil posisi sekarang
+        Vector3 pos = transform.position;
+
+        // Turun secara manual
+        pos.y -= fallSpeed * Time.deltaTime;
+
+        // KUNCI Z agar selalu sama
+        pos.z = fixedZ;
+
+        transform.position = pos;
+
+        // Destroy bila jatuh terlalu jauh
+        if (pos.y < destroyY)
             Destroy(gameObject);
-        }
+    }
+
+    void HandleRotation()
+    {
+        // rotasi 3D manual
+        transform.eulerAngles += new Vector3(
+            rotateSpeed * Time.deltaTime,
+            rotateSpeed * Time.deltaTime,
+            rotateSpeed * Time.deltaTime
+        );
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+            Destroy(gameObject);
     }
 }
