@@ -2,8 +2,6 @@
 
 public class PlayerHit : MonoBehaviour
 {
-    public Material playerMat;
-
     public Color normalColor = Color.white;
     public Color bombColor = Color.red;
     public Color fallColor = Color.green;
@@ -16,28 +14,32 @@ public class PlayerHit : MonoBehaviour
 
     ShieldSpawner shieldSpawner;
 
+    Renderer rend;
+    MaterialPropertyBlock mpb;
+
     void Start()
     {
         shieldSpawner = GetComponent<ShieldSpawner>();
 
+        rend = GetComponent<Renderer>();
+        mpb = new MaterialPropertyBlock();
+
         if (shieldSpawner == null)
-            Debug.LogError("PlayerHit tidak menemukan ShieldSpawner! Pastikan script ShieldSpawner ada di Player!");
+            Debug.LogError("PlayerHit tidak menemukan ShieldSpawner!");
     }
 
     void Update()
     {
-        // Kembalikan warna setelah durasi hit
         if (isHit)
         {
             timer += Time.deltaTime;
 
             if (timer >= hitDuration)
             {
-                // Jika shield aktif → warna shield
                 if (shieldSpawner != null && shieldSpawner.shieldActive)
-                    playerMat.SetColor("_BaseColor", shieldColor);
+                    SetColor(shieldColor);
                 else
-                    playerMat.SetColor("_BaseColor", normalColor);
+                    SetColor(normalColor);
 
                 isHit = false;
             }
@@ -55,15 +57,17 @@ public class PlayerHit : MonoBehaviour
                 return;
             }
 
-            playerMat.SetColor("_BaseColor", bombColor);
+            SetColor(bombColor);
+
             ScoreManager.Instance.SubScore(1);
-            ResetHit();
+            GameManager.Instance.GameOver();
+            return;
         }
 
         // --- Falling Object ---
-        else if (other.CompareTag("FallingObject"))
+        if (other.CompareTag("FallingObject"))
         {
-            playerMat.SetColor("_BaseColor", fallColor);
+            SetColor(fallColor);
             ScoreManager.Instance.AddScore(5);
             ResetHit();
         }
@@ -73,5 +77,12 @@ public class PlayerHit : MonoBehaviour
     {
         timer = 0f;
         isHit = true;
+    }
+
+    void SetColor(Color color)
+    {
+        rend.GetPropertyBlock(mpb);
+        mpb.SetColor("_BaseColor", color);
+        rend.SetPropertyBlock(mpb);
     }
 }

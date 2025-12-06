@@ -7,8 +7,8 @@ public class CherryBomb : MonoBehaviour
     public float destroyY = -10f;          // batas hancur
 
     [Header("Scaling Pulse Settings")]
-    public float minScale = 0.8f;          // ukuran minimum
-    public float maxScale = 1.2f;          // ukuran maksimum
+    public float minScale = 4f;          // ukuran minimum
+    public float maxScale = 5f;          // ukuran maksimum
     public float scaleSpeed = 2f;          // kecepatan perubahan skala
     private bool growing = true;           // status membesar atau mengecil
 

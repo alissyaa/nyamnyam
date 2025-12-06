@@ -1,18 +1,29 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class RandomSpawner : MonoBehaviour
 {
     public GameObject fallingObjectPrefab;
     public GameObject cherryBombPrefab;
 
-    public float spawnInterval = 0.5f; // makin kecil makin rame
-    public float minX = -4f;
-    public float maxX = 4f;
+    public float spawnInterval = 0.5f;
 
-    public int fallingObjectWeight = 5;  
-    public int cherryBombWeight = 5;   
+    public int fallingObjectWeight = 5;
+    public int cherryBombWeight = 5;
 
-    float timer = 0f;
+    float timer;
+
+    float minX;
+    float maxX;
+
+    void Start()
+    {
+        // Ambil batas layar dari kamera
+        Camera cam = Camera.main;
+        float z = Mathf.Abs(cam.transform.position.z);
+
+        minX = cam.ViewportToWorldPoint(new Vector3(0, 0, z)).x;
+        maxX = cam.ViewportToWorldPoint(new Vector3(1, 0, z)).x;
+    }
 
     void Update()
     {
@@ -28,17 +39,15 @@ public class RandomSpawner : MonoBehaviour
     void SpawnRandomObject()
     {
         float randomX = Random.Range(minX, maxX);
-        Vector3 spawnPos = new Vector3(randomX, transform.position.y, 0);
+        Vector3 spawnPos = new Vector3(randomX, transform.position.y, 0f);
 
         int roll = Random.Range(0, fallingObjectWeight + cherryBombWeight);
 
-        if (roll < fallingObjectWeight)
-        {
-            Instantiate(fallingObjectPrefab, spawnPos, Quaternion.identity);
-        }
-        else
-        {
-            Instantiate(cherryBombPrefab, spawnPos, Quaternion.identity);
-        }
+        GameObject prefabToSpawn =
+            roll < fallingObjectWeight
+            ? fallingObjectPrefab
+            : cherryBombPrefab;
+
+        Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
     }
 }
