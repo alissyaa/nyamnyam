@@ -1,45 +1,46 @@
 using UnityEngine;
+using System.Collections;
 
 public class FallingObject : MonoBehaviour
 {
-    public float fallSpeed = 3f;
-    public float destroyY = -10f;
+    public float fallSpeed = 3.0f;
+    public float destroyY = -10.0f;
+    public float rotateSpeed = 120.0f;
 
-    public float rotateSpeed = 120f; // rotasi 3D
-    private float fixedZ;            // Z tetap, biar selalu sejajar dengan player
+    public float fadeDuration = 0.5f; // durasi fade
+
+    private float fixedZ;
+    private Material mat;
+    private bool isFading = false; // biar gak trigger berkali-kali
 
     void Start()
     {
-        fixedZ = transform.position.z;   // ambil Z awal
+        fixedZ = transform.position.z;
+        mat = GetComponent<Renderer>().material;
     }
 
     void Update()
     {
-        HandleFall();
-        HandleRotation();
+        if (!isFading)
+        {
+            HandleFall();
+            HandleRotation();
+        }
     }
 
     void HandleFall()
     {
-        // Ambil posisi sekarang
         Vector3 pos = transform.position;
-
-        // Turun secara manual
         pos.y -= fallSpeed * Time.deltaTime;
-
-        // KUNCI Z agar selalu sama
         pos.z = fixedZ;
-
         transform.position = pos;
 
-        // Destroy bila jatuh terlalu jauh
         if (pos.y < destroyY)
             Destroy(gameObject);
     }
 
     void HandleRotation()
     {
-        // rotasi 3D manual
         transform.eulerAngles += new Vector3(
             rotateSpeed * Time.deltaTime,
             rotateSpeed * Time.deltaTime,
@@ -49,7 +50,32 @@ public class FallingObject : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
-            Destroy(gameObject);
+        if (other.CompareTag("Player") && !isFading)
+        {
+            StartCoroutine(FadeOut());
+        }
+    }
+
+    IEnumerator FadeOut()
+    {
+        isFading = true;
+
+        float t = 0f;
+        Color startColor = mat.color;
+
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, t / fadeDuration);
+            mat.color = new Color(
+                startColor.r,
+                startColor.g,
+                startColor.b,
+                alpha
+            );
+            yield return null;
+        }
+
+        Destroy(gameObject);
     }
 }
